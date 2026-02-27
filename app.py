@@ -4,21 +4,21 @@ import yt_dlp
 
 app = FastAPI()
 
-# CORS settings - Isse Vercel aur Render aapas mein connect hote hain
+# CORS configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 @app.get("/")
-async def home():
-    # 4 spaces ka gap zaroori hai
+async def root():
     return {"message": "Backend is Ready!"}
 
 @app.get("/api/download")
-async def download_video(url: str):
+async def download_video(url: str = None):
     if not url:
         raise HTTPException(status_code=400, detail="URL is required")
     
@@ -30,7 +30,6 @@ async def download_video(url: str):
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
-            # return hamesha with ke andar aur aage hota hai
             return {
                 "status": "success",
                 "title": info.get('title'),
