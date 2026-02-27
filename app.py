@@ -4,7 +4,7 @@ import yt_dlp
 
 app = FastAPI()
 
-# Ye line aapki Vercel website ko backend se jodne ke liye zaroori hai
+# CORS settings - Isse Vercel aur Render aapas mein connect hote hain
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,10 +14,14 @@ app.add_middleware(
 
 @app.get("/")
 async def home():
-    return {"message": "Backend is Running!"}
+    # 4 spaces ka gap zaroori hai
+    return {"message": "Backend is Ready!"}
 
 @app.get("/api/download")
 async def download_video(url: str):
+    if not url:
+        raise HTTPException(status_code=400, detail="URL is required")
+    
     try:
         ydl_opts = {
             'format': 'best',
@@ -26,12 +30,12 @@ async def download_video(url: str):
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
+            # return hamesha with ke andar aur aage hota hai
             return {
                 "status": "success",
-                "title": info.get('title', 'Video'),
+                "title": info.get('title'),
                 "thumbnail": info.get('thumbnail'),
-                "download_url": info.get('url'),
+                "download_url": info.get('url')
             }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
